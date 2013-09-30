@@ -10,7 +10,7 @@ class KDE:
 	def __init__(self):
 		self.url = "http://paste.kde.org/"
 
-	def upload(self,data,proxy=None):
+	def upload(self,data):
 		#First Base64 Encode the data-chunck
 		b64_result = base64.b64encode(data,None)
 
@@ -32,11 +32,7 @@ class KDE:
 		#Turn dictionary into key=val string suitable for post
 		post_data = urllib.urlencode(post)
 		#Open connection to site with post data	and return json data as an object
-		if proxy:
-			print "Using proxy:",proxy
-			response = json.loads(urllib.urlopen(self.url,post_data,proxies={"http":proxy}).read())
-		else:
-			response = json.loads(urllib.urlopen(self.url,post_data).read())
+		response = json.loads(urllib.urlopen(self.url,post_data).read())
 		
 		#Spam guard check
 		if response["result"].has_key("error"):
@@ -58,8 +54,7 @@ def split_str(s, l=2):
 
 #Function to actually push the data to the pastebins
 def push(opt):
-	if opt.proxy:
-		kde = KDE()
+	kde = KDE()
 	filename = args[0]
 	#If we are outputting to a file
 	if opt.output:
@@ -74,17 +69,12 @@ def push(opt):
 	part_size = spread_size / int(opt.chunks)
 	#split the data into chunks
 	parts = split_str(spread,part_size)
-	print "Parts:",len(parts)
 	count = 1
 	#Iterate over parts
 	for part in parts:
 		if opt.output:
 			#write the url to the file
-			if opt.proxy:
-				outfile.write(kde.upload(part,opt.proxy) + "\n")
 			outfile.write(kde.upload(part,opt.proxy) + "\n")
-		if opt.proxy:
-			print kde.upload(part,opt.proxy)
 		print kde.upload(part)
 		sleep(float(opt.sleep_time))
 	#close the file		
@@ -103,7 +93,6 @@ if __name__ == "__main__":
 	parser.add_option("-c","--chunks",default=2,dest="chunks",help="How many chunks you wish to split the file into(Default 2)")
 	parser.add_option("-o","--output",dest="output",help="Output file that holds the links to your spread data")
 	parser.add_option("-s","--sleep",dest="sleep_time",default=3,help="Time to wait before pushing the next chunk(Default 3)")
-	parser.add_option("-p","--proxy",dest="proxy",help="Make all connections using a proxy")
 	(options, args) = parser.parse_args()
 	if options.mode == "push":
 		push(options)

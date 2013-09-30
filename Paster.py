@@ -75,7 +75,8 @@ def push(opt):
 		if opt.output:
 			#write the url to the file
 			outfile.write(kde.upload(part) + "\n")
-		print kde.upload(part)
+		else:
+			print kde.upload(part)
 		sleep(float(opt.sleep_time))
 	#close the file		
 	if opt.output:
